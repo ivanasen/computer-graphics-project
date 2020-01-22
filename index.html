@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+
+<html>
+
+<body>
+  <h1>
+    "Описание на действието"<br />
+    <small>
+      ф.н. 81837 &ndash; група 4 &ndash; Иван-Асен Чакъров
+    </small>
+  </h1>
+
+  <script src="lib/human.js/three.min.js"></script>
+  <script src="lib/human.js/human.js"></script>
+  <script>
+    // нагласяване на цвета и центрирането на текста с имената ви
+    document.getElementsByTagName("h1")[0].style =
+      "color:white; text-align:center; font-size:1.75em";
+
+    // рисувателно поле на цял екран
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+    renderer.domElement.style =
+      "width:100%; height:100%; position:fixed; top:0; left:0; z-index:-1;";
+
+    // сцена и камера
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(
+      30,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      2000
+    );
+    camera.position.set(0, 3, 150);
+
+    // светлини
+    const light = new THREE.DirectionalLight("lightblue", 0.8);
+    light.position.set(0, 1, 4);
+    scene.add(light);
+    scene.add(new THREE.AmbientLight("white", 0.4));
+
+    // функция за анимиране на сцената
+    let t = 0; // време
+    function drawFrame() {
+      requestAnimationFrame(drawFrame);
+      if (animate) animate(t++);
+      renderer.render(scene, camera);
+    }
+
+    // човече
+    манекен = мъжествен();
+    // тук се описват статичните елементи на позата
+
+    // анимация на човечето
+    animate = function (t) {
+      // тук се описват динамичните елементи на позата
+      // като променливата t е номер на кадър, като се
+      // очаква 1 секунда да е приблизително 60 кадъра
+      манекен.врат.врът(0, 0, 10 * sin(5 * t) - 5);
+      манекен.глава.врът(0, 0, 10 * sin(5 * t) - 5);
+    };
+
+    drawFrame();
+  </script>
+</body>
+
+</html>
