@@ -24,6 +24,34 @@ function createScene() {
     scene.add(new THREE.AmbientLight('white'));
 
     // човече
+    initialisePlayer();
+
+    // ground
+    const loader = new THREE.TextureLoader();
+    const groundTexture = loader.load('../assets/textures/grasslight-big.jpg');
+    groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
+    groundTexture.repeat.set(25, 25);
+    groundTexture.anisotropy = 16;
+    groundTexture.encoding = THREE.sRGBEncoding;
+    const groundMaterial = new THREE.MeshLambertMaterial({ map: groundTexture });
+    const mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(20000, 20000), groundMaterial);
+    mesh.position.y = -42;
+    mesh.rotation.x = - Math.PI / 2;
+    mesh.receiveShadow = true;
+    scene.add(mesh);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.maxPolarAngle = Math.PI * 0.5;
+    controls.minDistance = 200;
+    controls.maxDistance = 400;
+
+
+
+    addBackgroundSound();
+    loadShutdownSound();
+}
+
+function initialisePlayer() {
     player = мъжествен();
     player.position.y -= 10;
     player.врат.врът(0, 0, -50);
@@ -43,37 +71,14 @@ function createScene() {
     setColor(player.глава, skinColor);
     setColor(player.д_глезен, 0xbbbbbb);
     setColor(player.л_глезен, 0xbbbbbb);
-    // setColor(player.л_китка, 0xffffff);
 
-    // земя
-    const loader = new THREE.TextureLoader();
-    const groundTexture = loader.load('../textures/grasslight-big.jpg');
-    groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
-    groundTexture.repeat.set(25, 25);
-    groundTexture.anisotropy = 16;
-    groundTexture.encoding = THREE.sRGBEncoding;
-
-    const groundMaterial = new THREE.MeshLambertMaterial({ map: groundTexture });
-
-    const mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(20000, 20000), groundMaterial);
-    mesh.position.y = -42;
-    mesh.rotation.x = - Math.PI / 2;
-    mesh.receiveShadow = true;
-    scene.add(mesh);
-
-    const controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.maxPolarAngle = Math.PI * 0.5;
-    controls.minDistance = 200;
-    controls.maxDistance = 400;
-
-    // тук се описват статичните елементи на позата
     const stick = createGolfStick();
     createBall();
 
     player.л_китка.add(stick);
 
-    // const hat = createPlayerHat();
-    // player.глава.add(hat);
+    hat = createPlayerHat();
+    player.глава.add(hat);
 }
 
 function createGolfStick() {
@@ -104,24 +109,39 @@ function createBall() {
     scene.add(ball);
 }
 
-// function createPlayerHat() {
-//     const hat = new THREE.Group();
+function createPlayerHat() {
+    const hat = new THREE.Group();
 
-//     const sphere = new THREE.SphereGeometry(3.5, 20, 20, 0, Math.PI * 2, 0, Math.PI / 2);
-//     const material = new THREE.MeshPhongMaterial({ color: 0xcccccc });
+    const sphere = new THREE.SphereGeometry(3.5, 20, 20, 0, Math.PI * 2, 0, Math.PI / 2);
+    const material = new THREE.MeshPhongMaterial({ color: 0xcccccc });
 
-//     hat.add(new THREE.Mesh(sphere, material));
-//     hat.rotation.z += 0.5;
-//     hat.position.y += 4;
+    // const peakGeometry = new THREE.SphereGeometry(3.5, 20, 20, 1.6, Math.PI * (2 / 3), Math.PI * (7 / 18), Math.PI / 6);
+    // const peak = new THREE.Mesh(peakGeometry, material);
+    // peak.position.y -= 2;
+    // peak.position.x += 2;
+    // peak.rotation.z += Math.PI / 3;
 
-//     return hat;
-// }
+    const peakGeometry = new THREE.PlaneGeometry(5, 6, 2, 2);
+    const peak = new THREE.Mesh(peakGeometry, material);
+    peak.material.side = THREE.DoubleSide;
+    peak.position.x += 3;
+    // peak.rotation.y += Math.PI / 2;
+    peak.rotation.x -= Math.PI / 2;
+
+    hat.add(new THREE.Mesh(sphere, material));
+    hat.add(peak);
+    hat.rotation.z += 0.5;
+    hat.position.y += 4;
+    hat.position.x -= 0.3;
+
+    return hat;
+}
 
 // функция за анимиране на сцената
 let t = 0; // време
 function drawFrame() {
     requestAnimationFrame(drawFrame);
-    if (animate) animate(t++);
+    animate(t++);
     renderer.render(scene, camera);
 }
 
@@ -146,6 +166,9 @@ const AnimationState = {
     },
     PLAYER_FALLING: {
         animate: animatePlayerFalling
+    },
+    FINISHED: {
+        animate: animateFinished
     }
 }
 let animationState = AnimationState.INITIAL;
@@ -156,16 +179,20 @@ function animate(t) {
 
 function animateInitial(t) {
     player.глава.врът(0, 20 * sin(t) - 20, 0);
+    hat.rotation.y = 0.2 * sin(t) - 0.1;
     player.л_ръка.врът(15 * sin(1.2 * t) + 30, 30, -30);
     player.д_ръка.врът(15 * sin(1.2 * t) + 55, 30, -30);
 }
 
-let tGolfSwing = 0;
+let tGolfSwing = -1;
 function animateGolfStickSwinging(t) {
-    if (tGolfSwing <= 100) {
+    if (tGolfSwing === -1) {
+
+        ++tGolfSwing;
+    } else if (tGolfSwing <= 100) {
         player.л_ръка.врът(tGolfSwing, 30, -30);
         player.д_ръка.врът(tGolfSwing + 25, 30, -30);
-        ++tGolfSwing;
+        tGolfSwing += 2;
     } else if (tGolfSwing <= 150) {
         player.л_ръка.врът(160 - tGolfSwing, 30, -30);
         player.д_ръка.врът(160 - tGolfSwing + 25, 30, -30);
@@ -187,31 +214,44 @@ function animateBallHit(t) {
         player.врат.врът(0, 0, 0);
     }
 
-    if (ball.position.y <= 500) {
+    if (ball.position.y <= 300) {
         ball.position.y += 0.2 * 15;
         ball.position.z += 0.3 * 15;
     } else {
-        ball.position.y = -40;
-        ball.position.z = 0;
         animationState = AnimationState.TURNING_AROUND;
     }
 }
 
+let turningAroundT = 0;
+let turningAroundDelta = 0.05;
 function animateTurningAround(t) {
-    player.rotation.set(0, - Math.PI / 2, 0);
-    animationState = AnimationState.BALL_FALLING;
+    if (turningAroundT <= 1) {
+        player.rotation.set(0, - turningAroundT * Math.PI / 2, 0);
+        player.глава.врът(0, 0, 0);
+        hat.rotation.y = 0;
+        player.л_ръка.врът(30, 0, 0);
+        player.д_ръка.врът(0, 0, -110);
+        player.д_лакът.врът(0, 0, -110);
+        player.д_китка.врът(0, -100, -80);
+        turningAroundT += turningAroundDelta;
+    } else {
+        animationState = AnimationState.BALL_FALLING;
+    }
+
 }
 
-let ballFallingT = 0;
+let ballFallingT = -120;
 function animateBallFalling(t) {
 
-    if (ballFallingT === 0) {
-        ball.position.y = 25;
-        ball.position.z = -60;
+    if (ballFallingT < 0) {
         ++ballFallingT;
-    } else if (ballFallingT <= 18) {
-        ball.position.y -= 1 * 0.52;
-        ball.position.z += 6 * 0.52;
+    } else if (ballFallingT === 0) {
+        ball.position.y = 65;
+        ball.position.z = -300;
+        ++ballFallingT;
+    } else if (ballFallingT <= 49) {
+        ball.position.y -= 1;
+        ball.position.z += 6;
         ++ballFallingT;
     } else {
         animationState = AnimationState.BALL_BOUNCING_OFF;
@@ -242,18 +282,32 @@ function animateBallBouncingOf(t) {
     ballBouncingT += ballBouncingDelta;
 }
 
-// let fallingT = 0;
+let fallingT = 0;
 let fallingDelta = 0.1;
+let pivot = new THREE.Group();
 function animatePlayerFalling(t) {
-    console.log('fefeffe');
+    if (fallingT === 0) {
+        pivot.position.set(0, -35, 0);
+        pivot.add(player);
+        player.position.y += 35;
+        scene.add(pivot);
+        fallingT++;
 
-    if (player.rotation.x < Math.PI / 2) {
-        player.rotation.x += fallingDelta;
+        player.д_лакът.врът(0, 0, 0);
+        player.д_китка.врът(0, 0, 0);
+    } else if (pivot.rotation.x < Math.PI / 2) {
+        pivot.rotation.x += fallingDelta;
+        player.л_ръка.врът(fallingT, 0, 0);
+        player.д_ръка.врът(-fallingT, 0, 0);
+        fallingT += fallingDelta * 30;
     } else {
-        // player.rotation.set(0, 0, 0);
-        // animationState = AnimationState.INITIAL;
+        shutDownSound.play();
+        animationState = AnimationState.FINISHED;
     }
 
+}
+
+function animateFinished(t) {
 }
 
 function setColor(obj, color) {
@@ -267,9 +321,40 @@ function setColor(obj, color) {
 const HIT_BALL_KEYCODE = 32;
 window.addEventListener('keypress', event => {
     if (event.keyCode === HIT_BALL_KEYCODE) {
-        animationState = AnimationState.GOLF_STICK_SWINGING;
+        if (!(animationState === AnimationState.FINISHED)) {
+            animationState = AnimationState.GOLF_STICK_SWINGING;
+        }
     }
 })
+
+function addBackgroundSound() {
+    const listener = new THREE.AudioListener();
+    camera.add(listener);
+
+    const sound = new THREE.Audio(listener);
+
+    const audioLoader = new THREE.AudioLoader();
+    audioLoader.load('../assets/sounds/outdoors.wav', function (buffer) {
+        sound.setBuffer(buffer);
+        sound.setLoop(true);
+        sound.setVolume(0.5);
+        sound.play();
+    });
+}
+
+function loadShutdownSound() {
+    const listener = new THREE.AudioListener();
+    camera.add(listener);
+
+    shutDownSound = new THREE.Audio(listener);
+    shutDownSound.duration = 2;
+    shutDownSound.setLoop(false);
+    shutDownSound.setVolume(0.5);
+
+    audioLoader = new THREE.AudioLoader();
+    audioLoader.load('../assets/sounds/shutdown.wav', buffer =>
+        shutDownSound.setBuffer(buffer));
+}
 
 createScene();
 drawFrame();
