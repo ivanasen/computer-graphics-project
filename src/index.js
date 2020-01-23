@@ -23,9 +23,6 @@ function createScene() {
     scene.add(light);
     scene.add(new THREE.AmbientLight('white'));
 
-    // човече
-    initialisePlayer();
-
     // ground
     const loader = new THREE.TextureLoader();
     const groundTexture = loader.load('../assets/textures/grasslight-big.jpg');
@@ -45,10 +42,9 @@ function createScene() {
     controls.minDistance = 200;
     controls.maxDistance = 400;
 
+    loadSounds();
 
-
-    addBackgroundSound();
-    loadShutdownSound();
+    initialisePlayer();
 }
 
 function initialisePlayer() {
@@ -115,17 +111,10 @@ function createPlayerHat() {
     const sphere = new THREE.SphereGeometry(3.5, 20, 20, 0, Math.PI * 2, 0, Math.PI / 2);
     const material = new THREE.MeshPhongMaterial({ color: 0xcccccc });
 
-    // const peakGeometry = new THREE.SphereGeometry(3.5, 20, 20, 1.6, Math.PI * (2 / 3), Math.PI * (7 / 18), Math.PI / 6);
-    // const peak = new THREE.Mesh(peakGeometry, material);
-    // peak.position.y -= 2;
-    // peak.position.x += 2;
-    // peak.rotation.z += Math.PI / 3;
-
     const peakGeometry = new THREE.PlaneGeometry(5, 6, 2, 2);
     const peak = new THREE.Mesh(peakGeometry, material);
     peak.material.side = THREE.DoubleSide;
     peak.position.x += 3;
-    // peak.rotation.y += Math.PI / 2;
     peak.rotation.x -= Math.PI / 2;
 
     hat.add(new THREE.Mesh(sphere, material));
@@ -161,9 +150,6 @@ const AnimationState = {
     BALL_FALLING: {
         animate: animateBallFalling
     },
-    BALL_BOUNCING_OFF: {
-        animate: animateBallBouncingOf
-    },
     PLAYER_FALLING: {
         animate: animatePlayerFalling
     },
@@ -181,7 +167,7 @@ function animateInitial(t) {
     player.глава.врът(0, 20 * sin(t) - 20, 0);
     hat.rotation.y = 0.2 * sin(t) - 0.1;
     player.л_ръка.врът(15 * sin(1.2 * t) + 30, 30, -30);
-    player.д_ръка.врът(15 * sin(1.2 * t) + 55, 30, -30);
+    player.д_ръка.врът(15 * sin(1.2 * t) + 56, 30, -30);
 }
 
 let tGolfSwing = -1;
@@ -200,6 +186,7 @@ function animateGolfStickSwinging(t) {
     } else {
         tGolfSwing = 0;
         animationState = AnimationState.BALL_HIT;
+        ballHitSound.play();
     }
 }
 
@@ -242,7 +229,6 @@ function animateTurningAround(t) {
 
 let ballFallingT = -120;
 function animateBallFalling(t) {
-
     if (ballFallingT < 0) {
         ++ballFallingT;
     } else if (ballFallingT === 0) {
@@ -254,38 +240,49 @@ function animateBallFalling(t) {
         ball.position.z += 6;
         ++ballFallingT;
     } else {
-        animationState = AnimationState.BALL_BOUNCING_OFF;
+        animationState = AnimationState.PLAYER_FALLING;
+        headHitSound.play();
     }
 }
 
 let ballInitialPosition;
 let targetPosition;
 let ballBouncingT = 0;
-let ballBouncingDelta = 0.1;
+let ballBouncingDelta = 0.01;
 function animateBallBouncingOf(t) {
     if (ballBouncingT === 0) {
         ballInitialPosition = ball.position.clone();
+
+        controlPointPosition = ball.position.clone();
+        controlPointPosition.y += 20;
+        controlPointPosition.z -= 20;
+
         targetPosition = ball.position.clone();
         targetPosition.y -= 50;
-        targetPosition.z -= 30;
+        targetPosition.z -= 40;
     } else if (ballBouncingT <= 1) {
-        ball.position.z =
-            (1 - ballBouncingT) * ballInitialPosition.z
-            + ballBouncingT * targetPosition.z;
-        ball.position.y =
-            (1 - ballBouncingT) * ballInitialPosition.y
-            + ballBouncingT * targetPosition.y;
+        ball.position.z = Math.pow(1 - ballBouncingT, 2) * ballInitialPosition.z
+            + 2 * ballBouncingT * (1 - ballBouncingT) * controlPointPosition.z
+            + Math.pow(ballBouncingT, 2) * targetPosition.z;
+
+        ball.position.y = Math.pow(1 - ballBouncingT, 2) * ballInitialPosition.y
+            + 2 * ballBouncingT * (1 - ballBouncingT) * controlPointPosition.y
+            + Math.pow(ballBouncingT, 2) * targetPosition.y;
     } else {
-        animationState = AnimationState.PLAYER_FALLING;
+        animationState = AnimationState.FINISHED;
     }
 
     ballBouncingT += ballBouncingDelta;
+    ballBouncingDelta += 0.001;
 }
 
 let fallingT = 0;
-let fallingDelta = 0.1;
+let fallingDelta = 3;
+let rotationT = 0;
 let pivot = new THREE.Group();
 function animatePlayerFalling(t) {
+    animateBallBouncingOf(t);
+
     if (fallingT === 0) {
         pivot.position.set(0, -35, 0);
         pivot.add(player);
@@ -296,13 +293,13 @@ function animatePlayerFalling(t) {
         player.д_лакът.врът(0, 0, 0);
         player.д_китка.врът(0, 0, 0);
     } else if (pivot.rotation.x < Math.PI / 2) {
-        pivot.rotation.x += fallingDelta;
+        pivot.rotation.x = rotationT * Math.PI / 2;
         player.л_ръка.врът(fallingT, 0, 0);
         player.д_ръка.врът(-fallingT, 0, 0);
-        fallingT += fallingDelta * 30;
+        fallingT += fallingDelta;
+        rotationT += 0.08;
     } else {
         shutDownSound.play();
-        animationState = AnimationState.FINISHED;
     }
 
 }
@@ -327,33 +324,30 @@ window.addEventListener('keypress', event => {
     }
 })
 
-function addBackgroundSound() {
+function loadSounds() {
     const listener = new THREE.AudioListener();
     camera.add(listener);
 
-    const sound = new THREE.Audio(listener);
-
+    const backgroundSound = new THREE.Audio(listener);
     const audioLoader = new THREE.AudioLoader();
     audioLoader.load('../assets/sounds/outdoors.wav', function (buffer) {
-        sound.setBuffer(buffer);
-        sound.setLoop(true);
-        sound.setVolume(0.5);
-        sound.play();
+        backgroundSound.setBuffer(buffer);
+        backgroundSound.setLoop(true);
+        backgroundSound.setVolume(0.5);
+        backgroundSound.play();
     });
-}
-
-function loadShutdownSound() {
-    const listener = new THREE.AudioListener();
-    camera.add(listener);
 
     shutDownSound = new THREE.Audio(listener);
-    shutDownSound.duration = 2;
-    shutDownSound.setLoop(false);
-    shutDownSound.setVolume(0.5);
-
-    audioLoader = new THREE.AudioLoader();
     audioLoader.load('../assets/sounds/shutdown.wav', buffer =>
         shutDownSound.setBuffer(buffer));
+
+    ballHitSound = new THREE.Audio(listener);
+    audioLoader.load('../assets/sounds/ball-hit.wav', buffer =>
+        ballHitSound.setBuffer(buffer));
+
+    headHitSound = new THREE.Audio(listener);
+    audioLoader.load('../assets/sounds/head-hit.wav', buffer =>
+        headHitSound.setBuffer(buffer));
 }
 
 createScene();
