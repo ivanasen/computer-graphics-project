@@ -18,32 +18,32 @@ function createScene() {
 
 
     // светлини
-    const light = new THREE.DirectionalLight("lightblue", 0.5);
+    const light = new THREE.DirectionalLight('lightblue', 0.5);
     light.position.set(0, 1, 4);
     scene.add(light);
-    scene.add(new THREE.AmbientLight("white"));
+    scene.add(new THREE.AmbientLight('white'));
 
     // човече
-    манекен = мъжествен();
-    манекен.position.y -= 10;
-    манекен.врат.врът(0, 0, -50);
-    манекен.л_лакът.врът(10, 40, -30);
-    манекен.д_лакът.врът(3, 40, 5);
-    манекен.л_ръка.врът(12, 30, -10);
-    манекен.д_ръка.врът(42, 30, -18);
-    console.log(манекен);
+    player = мъжествен();
+    player.position.y -= 10;
+    player.врат.врът(0, 0, -50);
+    player.л_лакът.врът(10, 40, -30);
+    player.д_лакът.врът(3, 40, 5);
+    player.л_ръка.врът(12, 30, -10);
+    player.д_ръка.врът(42, 30, -18);
+    console.log(player);
 
     const tShirtColor = 0x024c85;
     const skinColor = 0x59372e;
     const pantsColor = 0x192027;
-    setColor(манекен.таз, pantsColor);
-    setColor(манекен.тяло, tShirtColor);
-    setColor(манекен.л_лакът, skinColor);
-    setColor(манекен.д_лакът, skinColor);
-    setColor(манекен.глава, skinColor);
-    setColor(манекен.д_глезен, 0xbbbbbb);
-    setColor(манекен.л_глезен, 0xbbbbbb);
-    // setColor(манекен.л_китка, 0xffffff);
+    setColor(player.таз, pantsColor);
+    setColor(player.тяло, tShirtColor);
+    setColor(player.л_лакът, skinColor);
+    setColor(player.д_лакът, skinColor);
+    setColor(player.глава, skinColor);
+    setColor(player.д_глезен, 0xbbbbbb);
+    setColor(player.л_глезен, 0xbbbbbb);
+    // setColor(player.л_китка, 0xffffff);
 
     // земя
     const loader = new THREE.TextureLoader();
@@ -70,10 +70,10 @@ function createScene() {
     const stick = createGolfStick();
     createBall();
 
-    манекен.л_китка.add(stick);
+    player.л_китка.add(stick);
 
     // const hat = createPlayerHat();
-    // манекен.глава.add(hat);
+    // player.глава.add(hat);
 }
 
 function createGolfStick() {
@@ -98,7 +98,7 @@ function createGolfStick() {
 
 function createBall() {
     const geometry = new THREE.SphereGeometry(1);
-    const material = new THREE.MeshLambertMaterial({ color: "white" });
+    const material = new THREE.MeshLambertMaterial({ color: 'white' });
     ball = new THREE.Mesh(geometry, material);
     ball.position.set(33, -40, 0);
     scene.add(ball);
@@ -125,34 +125,136 @@ function drawFrame() {
     renderer.render(scene, camera);
 }
 
-let ballShouldFly = false;
-let shouldFallOnHead = false;
-// анимация на човечето
-animate = function (t) {
-    // тук се описват динамичните елементи на позата
-    // като променливата t е номер на кадър, като се
-    // очаква 1 секунда да е приблизително 60 кадъра
-    // манекен.врат.врът(5 * sin(15 * t) - 2, 13 * sin(10 * t) - 15, 10 * sin(10 * t) - 5);
-    манекен.глава.врът(0, 20 * sin(t) - 20, 0);
+const AnimationState = {
+    INITIAL: {
+        animate: animateInitial
+    },
+    GOLF_STICK_SWINGING: {
+        animate: animateGolfStickSwinging
+    },
+    BALL_HIT: {
+        animate: animateBallHit
+    },
+    TURNING_AROUND: {
+        animate: animateTurningAround
+    },
+    BALL_FALLING: {
+        animate: animateBallFalling
+    },
+    BALL_BOUNCING_OFF: {
+        animate: animateBallBouncingOf
+    },
+    PLAYER_FALLING: {
+        animate: animatePlayerFalling
+    }
+}
+let animationState = AnimationState.INITIAL;
 
-    // манекен.rotation.y = 8;
+function animate(t) {
+    animationState.animate(t);
+};
 
-    манекен.л_ръка.врът(15 * sin(1.2 * t) + 30, 30, -30);
-    манекен.д_ръка.врът(15 * sin(1.2 * t) + 55, 30, -30);
+function animateInitial(t) {
+    player.глава.врът(0, 20 * sin(t) - 20, 0);
+    player.л_ръка.врът(15 * sin(1.2 * t) + 30, 30, -30);
+    player.д_ръка.врът(15 * sin(1.2 * t) + 55, 30, -30);
+}
 
-    if (ballShouldFly) {
-        if (ball.position.y <= 500) {
-            ball.position.y += 0.2 * 15;
-            ball.position.z += 0.3 * 15;
-        } else {
-            ball.position.y = -40;
-            ball.position.z = 0;
-            ballShouldFly = false;
-        }
+let tGolfSwing = 0;
+function animateGolfStickSwinging(t) {
+    if (tGolfSwing <= 100) {
+        player.л_ръка.врът(tGolfSwing, 30, -30);
+        player.д_ръка.врът(tGolfSwing + 25, 30, -30);
+        ++tGolfSwing;
+    } else if (tGolfSwing <= 150) {
+        player.л_ръка.врът(160 - tGolfSwing, 30, -30);
+        player.д_ръка.врът(160 - tGolfSwing + 25, 30, -30);
+        tGolfSwing += 5;
+    } else {
+        tGolfSwing = 0;
+        animationState = AnimationState.BALL_HIT;
+    }
+}
 
+let tGolfSwingAfterHit = 150;
+function animateBallHit(t) {
+    if (tGolfSwingAfterHit <= 250) {
+        player.л_ръка.врът(160 - tGolfSwingAfterHit, 30, -30);
+        player.д_ръка.врът(160 - tGolfSwingAfterHit + 25, 30, -30);
+        tGolfSwingAfterHit += 5;
+
+        player.глава.врът(0, -60, 0);
+        player.врат.врът(0, 0, 0);
     }
 
-};
+    if (ball.position.y <= 500) {
+        ball.position.y += 0.2 * 15;
+        ball.position.z += 0.3 * 15;
+    } else {
+        ball.position.y = -40;
+        ball.position.z = 0;
+        animationState = AnimationState.TURNING_AROUND;
+    }
+}
+
+function animateTurningAround(t) {
+    player.rotation.set(0, - Math.PI / 2, 0);
+    animationState = AnimationState.BALL_FALLING;
+}
+
+let ballFallingT = 0;
+function animateBallFalling(t) {
+
+    if (ballFallingT === 0) {
+        ball.position.y = 25;
+        ball.position.z = -60;
+        ++ballFallingT;
+    } else if (ballFallingT <= 18) {
+        ball.position.y -= 1 * 0.52;
+        ball.position.z += 6 * 0.52;
+        ++ballFallingT;
+    } else {
+        animationState = AnimationState.BALL_BOUNCING_OFF;
+    }
+}
+
+let ballInitialPosition;
+let targetPosition;
+let ballBouncingT = 0;
+let ballBouncingDelta = 0.1;
+function animateBallBouncingOf(t) {
+    if (ballBouncingT === 0) {
+        ballInitialPosition = ball.position.clone();
+        targetPosition = ball.position.clone();
+        targetPosition.y -= 50;
+        targetPosition.z -= 30;
+    } else if (ballBouncingT <= 1) {
+        ball.position.z =
+            (1 - ballBouncingT) * ballInitialPosition.z
+            + ballBouncingT * targetPosition.z;
+        ball.position.y =
+            (1 - ballBouncingT) * ballInitialPosition.y
+            + ballBouncingT * targetPosition.y;
+    } else {
+        animationState = AnimationState.PLAYER_FALLING;
+    }
+
+    ballBouncingT += ballBouncingDelta;
+}
+
+// let fallingT = 0;
+let fallingDelta = 0.1;
+function animatePlayerFalling(t) {
+    console.log('fefeffe');
+
+    if (player.rotation.x < Math.PI / 2) {
+        player.rotation.x += fallingDelta;
+    } else {
+        // player.rotation.set(0, 0, 0);
+        // animationState = AnimationState.INITIAL;
+    }
+
+}
 
 function setColor(obj, color) {
     obj.traverse((child) => {
@@ -162,9 +264,10 @@ function setColor(obj, color) {
     });
 }
 
-window.addEventListener("keypress", event => {
-    if (event.keyCode === 32) {
-        ballShouldFly = true;
+const HIT_BALL_KEYCODE = 32;
+window.addEventListener('keypress', event => {
+    if (event.keyCode === HIT_BALL_KEYCODE) {
+        animationState = AnimationState.GOLF_STICK_SWINGING;
     }
 })
 
