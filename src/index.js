@@ -55,7 +55,6 @@ function initialisePlayer() {
     player.д_лакът.врът(3, 40, 5);
     player.л_ръка.врът(12, 30, -10);
     player.д_ръка.врът(42, 30, -18);
-    console.log(player);
 
     const tShirtColor = 0x024c85;
     const skinColor = 0x59372e;
