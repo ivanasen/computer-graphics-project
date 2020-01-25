@@ -39,12 +39,17 @@ function createScene() {
 
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.maxPolarAngle = Math.PI * 0.5;
-    controls.minDistance = 200;
+    controls.minDistance = 100;
     controls.maxDistance = 400;
 
     loadSounds();
 
     initialisePlayer();
+
+    const car = createGolfCar();
+    car.position.y -= 30;
+    car.position.z -= 60;
+    scene.add(car);
 }
 
 function addLights() {
