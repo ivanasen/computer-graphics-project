@@ -1,17 +1,11 @@
 function createGolfCar() {
     const carGroup = new THREE.Group();
 
-    // const wireframe = new THREE.Mesh(new THREE.BoxGeometry(40, 90, 70), new THREE.MeshPhysicalMaterial({ transparent: true, opacity: 0.3 }));
-    // carGroup.add(wireframe);
-
     const tires = createTires();
     carGroup.add(tires);
 
     const bottom = createBottom();
     carGroup.add(bottom);
-
-    // const inner = createInner();
-    // carGroup.add(inner);
 
     const front = createFront();
     carGroup.add(front);
@@ -25,15 +19,56 @@ function createGolfCar() {
     const roof = createRoof();
     carGroup.add(roof);
 
+    const trailer = createTrailer();
+    carGroup.add(trailer);
+
     return carGroup;
+}
+
+function createTrailer() {
+    const group = new THREE.Group();
+
+    const geometry = new THREE.BoxGeometry(35, 12, 40);
+    const material = new THREE.MeshPhysicalMaterial({ color: 0xfff8f8 });
+    material.reflectivity = 1;
+    material.side = THREE.DoubleSide;
+    const trailer = new THREE.Mesh(geometry, material);
+
+    trailer.position.z -= 44;
+    trailer.position.y += 15;
+
+    trailer.geometry.faces.splice(4, 2);
+
+    console.log(trailer);
+
+    // trailer.faces[0].remove();
+
+    group.add(trailer);
+
+    const cylinderM = new THREE.MeshPhysicalMaterial({ color: 0x000000 });
+    const cylinderG = new THREE.CylinderGeometry(0.5, 0.5, 5);
+    const cylinder1 = new THREE.Mesh(cylinderG, cylinderM);
+    cylinder1.position.z -= 38;
+    cylinder1.position.y += 7;
+    cylinder1.position.x += 15;
+
+    const cylinder2 = new THREE.Mesh(cylinderG, cylinderM);
+    cylinder2.position.z -= 38;
+    cylinder2.position.y += 7;
+    cylinder2.position.x -= 15;
+
+    group.add(cylinder1);
+    group.add(cylinder2);
+
+    return group;
 }
 
 function createRoof() {
     const shape = new THREE.Shape();
     shape.moveTo(0, 0);
-    shape.lineTo(37, 0);
-    shape.lineTo(37, 0.5);
-    shape.lineTo(0, 0.5);
+    shape.lineTo(40, 0);
+    shape.lineTo(40, 0.1);
+    shape.lineTo(0, 0.1);
 
     const extrudeSettings = {
         steps: 2,
@@ -86,10 +121,51 @@ function createFrame() {
     cylinder4.position.z += 16;
     cylinder4.position.y += 34;
 
+    const cylinderG3 = new THREE.CylinderGeometry(0.5, 0.5, 10);
+    const cylinder5 = new THREE.Mesh(cylinderG3, cylinderM);
+    cylinder5.position.z -= 20;
+    cylinder5.position.y += 10;
+    cylinder5.position.x += 15;
+
+    const cylinder6 = new THREE.Mesh(cylinderG3, cylinderM);
+    cylinder6.position.z -= 20;
+    cylinder6.position.y += 10;
+    cylinder6.position.x -= 15;
+
+    const cylinderG4 = new THREE.CylinderGeometry(0.5, 0.5, 4);
+    const cylinder7 = new THREE.Mesh(cylinderG4, cylinderM);
+    cylinder7.position.z -= 20.8;
+    cylinder7.position.y += 16;
+    cylinder7.position.x += 15;
+    cylinder7.rotation.x -= Math.PI / 6;
+
+    const cylinder8 = new THREE.Mesh(cylinderG4, cylinderM);
+    cylinder8.position.z -= 20.8;
+    cylinder8.position.y += 16;
+    cylinder8.position.x -= 15;
+    cylinder8.rotation.x -= Math.PI / 6;
+
+    const cylinderG5 = new THREE.CylinderGeometry(0.5, 0.5, 17);
+    const cylinder9 = new THREE.Mesh(cylinderG5, cylinderM);
+    cylinder9.position.z -= 21.9;
+    cylinder9.position.y += 26.1;
+    cylinder9.position.x += 15;
+
+    const cylinder10 = new THREE.Mesh(cylinderG5, cylinderM);
+    cylinder10.position.z -= 21.9;
+    cylinder10.position.y += 26.1;
+    cylinder10.position.x -= 15;
+
     group.add(cylinder1);
     group.add(cylinder2);
     group.add(cylinder3);
     group.add(cylinder4);
+    group.add(cylinder5);
+    group.add(cylinder6);
+    group.add(cylinder7);
+    group.add(cylinder8);
+    group.add(cylinder9);
+    group.add(cylinder10);
 
     return group;
 }

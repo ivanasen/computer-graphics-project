@@ -47,8 +47,10 @@ function createScene() {
     initialisePlayer();
 
     const car = createGolfCar();
+    car.position.x -= 70;
     car.position.y -= 30;
-    car.position.z -= 60;
+    car.position.z -= 50;
+    car.rotation.y += Math.PI / 6;
     scene.add(car);
 }
 
