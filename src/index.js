@@ -55,21 +55,7 @@ function createScene() {
     scene.add(golfCar);
 }
 
-function addClothes() {
-    // const pants = new THREE.Group();
-
-    // const pantsG = new THREE.CylinderGeometry(6, 6, 5, 20);
-    // const pantsM = new THREE.MeshPhysicalMaterial({ color: 'blue' });
-    // const pants = new THREE.Mesh(pantsG, pantsM);
-    // tShirt.position.y += 5;
-    // player.таз.add(pants);
-}
-
 function addLights() {
-    // const light = new THREE.DirectionalLight('lightblue', 0.3);
-    // light.position.set(0, 100, 100);
-    // light.castShadow = true;
-    // scene.add(light);
     scene.add(new THREE.AmbientLight(0xf8f8f8));
 
     const pointLight = new THREE.PointLight(0xc8c8a8);
@@ -125,8 +111,6 @@ function initialisePlayer() {
 
     hat = createPlayerHat();
     player.глава.add(hat);
-
-    addClothes();
 
     player.traverse(child => {
         child.castShadow = true;
@@ -369,10 +353,10 @@ function animatePlayerFalling(t) {
 
         player.д_лакът.врът(0, 0, 0);
         player.д_китка.врът(0, 0, 0);
-    } else if (pivot.rotation.x < Math.PI / 2.1) {
+    } else if (pivot.rotation.x < Math.PI / 2.095) {
         pivot.rotation.x = rotationT * Math.PI / 2;
-        player.л_ръка.врът(fallingT * 1.5, 0, 0);
-        player.д_ръка.врът(-fallingT * 1.5, 0, 0);
+        player.л_ръка.врът(fallingT * 1.1, 0, 0);
+        player.д_ръка.врът(-fallingT * 1.1, 0, 0);
         fallingT += fallingDelta;
 
         player.таз.врът(0, 0, 0);
@@ -383,7 +367,7 @@ function animatePlayerFalling(t) {
         player.д_глезен.врът(bodyT * -10, 0, bodyT * 40);
         player.л_глезен.врът(bodyT * 10, 0, bodyT * 10);
 
-        rotationT += 0.08;
+        rotationT += 0.035;
         if (bodyT < 1) {
             bodyT += bodyDelta;
         }
