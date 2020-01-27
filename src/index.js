@@ -47,19 +47,21 @@ function createScene() {
     initialisePlayer();
 
     const car = createGolfCar();
-    car.position.x -= 70;
+    car.position.x -= 80;
     car.position.y -= 30;
-    car.position.z -= 50;
-    car.rotation.y += Math.PI / 6;
+    car.position.z -= 60;
+    car.rotation.y += Math.PI / 5;
     scene.add(car);
 }
 
 function addClothes() {
-    // const tShirtG = new THREE.CylinderGeometry(5, 5, 20, 20);
-    // const tShirtM = new THREE.MeshPhongMaterial({ color: 'blue' });
-    // const tShirt = new THREE.Mesh(tShirtG, tShirtM);
+    // const pants = new THREE.Group();
+
+    // const pantsG = new THREE.CylinderGeometry(6, 6, 5, 20);
+    // const pantsM = new THREE.MeshPhysicalMaterial({ color: 'blue' });
+    // const pants = new THREE.Mesh(pantsG, pantsM);
     // tShirt.position.y += 5;
-    // player.тяло.add(tShirt);
+    // player.таз.add(pants);
 }
 
 function addLights() {

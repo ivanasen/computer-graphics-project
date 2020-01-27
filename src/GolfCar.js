@@ -30,30 +30,10 @@ function createGolfCar() {
         child.metalness = 0.5;
     });
 
+    const driver = initialiseDriver();
+    carGroup.add(driver);
+
     return carGroup;
-}
-
-function createLittleThinghy() {
-    const group = new THREE.Group();
-
-    const geometry = new THREE.BoxGeometry(8, 5, 1);
-    const geometry1 = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshPhysicalMaterial({ color: 0x121212 });
-    const thingy = new THREE.Mesh(geometry, material);
-    const thingy1 = new THREE.Mesh(geometry1, material);
-
-    thingy.position.x += 10;
-    thingy.position.y += 1;
-    thingy.position.z -= 1;
-
-    thingy1.position.x += 4;
-    thingy1.position.y += 1;
-    thingy1.position.z -= 1;
-
-    group.add(thingy);
-    group.add(thingy1);
-
-    return group;
 }
 
 function createTrailer() {
@@ -544,4 +524,98 @@ function createTire() {
     tireGroup.add(innerCylinder1);
 
     return tireGroup;
+}
+
+function createLittleThinghy() {
+    const group = new THREE.Group();
+
+    const geometry = new THREE.BoxGeometry(8, 5, 1);
+    const geometry1 = new THREE.BoxGeometry(1, 1, 1);
+    const material = new THREE.MeshPhysicalMaterial({ color: 0x121212 });
+    const thingy = new THREE.Mesh(geometry, material);
+    const thingy1 = new THREE.Mesh(geometry1, material);
+
+    thingy.position.x += 10;
+    thingy.position.y += 1;
+    thingy.position.z -= 1;
+
+    thingy1.position.x += 3.5;
+    thingy1.position.y += 1;
+    thingy1.position.z -= 1;
+
+    group.add(thingy);
+    group.add(thingy1);
+
+    return group;
+}
+
+function initialiseDriver() {
+    const driver = мъжествен();
+    console.log(driver);
+    driver.position.y += 12;
+    driver.position.z -= 6;
+    driver.rotation.y -= Math.PI / 2;
+
+    driver.тяло.врът(0, 0, -60);
+
+    driver.врат.врът(0, 0, 30);
+
+    driver.л_ръка.врът(30, 10, -30);
+    driver.л_лакът.врът(0, 0, -125);
+    driver.д_лакът.врът(0, 0, -125);
+    driver.л_китка.врът(0, 0, -50);
+    driver.д_китка.врът(0, 0, -50);
+    driver.д_ръка.врът(-30, -10, -30);
+
+    driver.л_крак.врът(-10, -20, -90);
+    driver.д_крак.врът(10, 20, -90);
+    driver.л_коляно.врът(20, 0, 110);
+    driver.д_коляно.врът(20, 0, 110);
+    driver.д_глезен.врът(0, 0, -20);
+    driver.л_глезен.врът(0, 0, -20);
+
+    const antennas = createAntennas();
+    driver.глава.add(antennas);
+
+    driver.traverse(child => {
+        if (child.type === 'Mesh') {
+            child.material.color.set(0x25b71b);
+        }
+    });
+
+    return driver;
+}
+
+function createAntennas() {
+    const group = new THREE.Group();
+
+    const antennaG = new THREE.CylinderGeometry(0.2, 0.4, 5);
+    const antennaM = new THREE.MeshPhongMaterial({ color: 0x25b71b });
+    const antenna1 = new THREE.Mesh(antennaG, antennaM);
+    const antenna2 = new THREE.Mesh(antennaG, antennaM);
+
+    antenna1.rotation.x -= Math.PI / 2.2;
+    antenna1.position.y += 5;
+    antenna1.position.z -= 5;
+
+    antenna2.rotation.x += Math.PI / 0.4;
+    antenna2.position.y += 5;
+    antenna2.position.z += 5;
+
+    const endG = new THREE.SphereGeometry(0.6);
+    const end1 = new THREE.Mesh(endG, antennaM);
+    const end2 = new THREE.Mesh(endG, antennaM);
+
+    end1.position.y += 5.2;
+    end1.position.z -= 6.8;
+
+    end2.position.y += 5.2;
+    end2.position.z += 6.8;
+
+    group.add(antenna1);
+    group.add(antenna2);
+    group.add(end1);
+    group.add(end2);
+
+    return group;
 }
