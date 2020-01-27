@@ -46,12 +46,13 @@ function createScene() {
 
     initialisePlayer();
 
-    const car = createGolfCar();
-    car.position.x -= 80;
-    car.position.y -= 30;
-    car.position.z -= 60;
-    car.rotation.y += Math.PI / 5;
-    scene.add(car);
+    golfCar = createGolfCar();
+    golfCar.position.x -= 100;
+    golfCar.position.y -= 30;
+    golfCar.position.z -= 70;
+    golfCar.rotation.y += Math.PI / 5;
+
+    scene.add(golfCar);
 }
 
 function addClothes() {
@@ -217,6 +218,9 @@ const AnimationState = {
     PLAYER_FALLING: {
         animate: animatePlayerFalling
     },
+    CAR_MOVING: {
+        animate: animateCarMoving
+    },
     FINISHED: {
         animate: animateFinished
     }
@@ -339,7 +343,7 @@ function animateBallBouncingOf(t) {
             + 2 * ballBouncingT * (1 - ballBouncingT) * controlPointPosition.y
             + Math.pow(ballBouncingT, 2) * targetPosition.y;
     } else {
-        animationState = AnimationState.FINISHED;
+        animationState = AnimationState.CAR_MOVING;
     }
 
     ballBouncingT += ballBouncingDelta;
@@ -390,6 +394,46 @@ function animatePlayerFalling(t) {
         }
     }
 
+}
+
+let carMovingT = -1;
+let carMovingDelta = 0.005;
+let originalPosition;
+function animateCarMoving(t) {
+    if (carMovingT >= 1) {
+        animationState = AnimationState.FINISHED;
+        return;
+    }
+
+    animateCarGoingUp(carMovingT);
+
+    if (carMovingT == -1) {
+        originalPosition = golfCar.position.clone();
+        endPosition = originalPosition.clone();
+        endPosition.x += 100;
+        endPosition.z += 100;
+        carMovingT = 0;
+    } else {
+        let tSin = Math.sin(carMovingT * Math.PI / 2);
+        golfCar.position.x = (1 - tSin) * originalPosition.x + tSin * endPosition.x;
+        golfCar.position.z = (1 - tSin) * originalPosition.z + tSin * endPosition.z;
+        carMovingT += carMovingDelta;
+    }
+
+}
+
+function animateCarGoingUp(t) {
+    if (t >= 0.4 && t < 0.7) {
+        const m = (t - 0.4) * 1 / 0.3;
+        golfCar.rotation.z = m * Math.PI / 30;
+        golfCar.rotation.x = -m * Math.PI / 30;
+        golfCar.position.y = m * 1 - 30;
+    } else if (t >= 0.7) {
+        const m = (t - 0.7) * 1 / 0.2;
+        golfCar.rotation.z = (1 - m) * Math.PI / 30;
+        golfCar.rotation.x = -(1 - m) * Math.PI / 30;
+        golfCar.position.y = (1 - m) * 1 - 30;
+    }
 }
 
 function animateFinished(t) {
