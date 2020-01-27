@@ -22,7 +22,38 @@ function createGolfCar() {
     const trailer = createTrailer();
     carGroup.add(trailer);
 
+    carGroup.add(createLittleThinghy());
+
+    carGroup.traverse(child => {
+        child.castShadow = true;
+        child.reflectivity = 0.8;
+        child.metalness = 0.5;
+    });
+
     return carGroup;
+}
+
+function createLittleThinghy() {
+    const group = new THREE.Group();
+
+    const geometry = new THREE.BoxGeometry(8, 5, 1);
+    const geometry1 = new THREE.BoxGeometry(1, 1, 1);
+    const material = new THREE.MeshPhysicalMaterial({ color: 0x121212 });
+    const thingy = new THREE.Mesh(geometry, material);
+    const thingy1 = new THREE.Mesh(geometry1, material);
+
+    thingy.position.x += 10;
+    thingy.position.y += 1;
+    thingy.position.z -= 1;
+
+    thingy1.position.x += 4;
+    thingy1.position.y += 1;
+    thingy1.position.z -= 1;
+
+    group.add(thingy);
+    group.add(thingy1);
+
+    return group;
 }
 
 function createTrailer() {
@@ -30,7 +61,6 @@ function createTrailer() {
 
     const geometry = new THREE.BoxGeometry(35, 12, 40);
     const material = new THREE.MeshPhysicalMaterial({ color: 0xfff8f8 });
-    material.reflectivity = 1;
     material.side = THREE.DoubleSide;
     const trailer = new THREE.Mesh(geometry, material);
 
@@ -38,10 +68,6 @@ function createTrailer() {
     trailer.position.y += 15;
 
     trailer.geometry.faces.splice(4, 2);
-
-    console.log(trailer);
-
-    // trailer.faces[0].remove();
 
     group.add(trailer);
 
@@ -462,7 +488,6 @@ function createFront() {
     };
 
     const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-    console.log(geometry);
 
     const material = new THREE.MeshPhysicalMaterial({ color: 0xff0000 });
     const front = new THREE.Mesh(geometry, material);

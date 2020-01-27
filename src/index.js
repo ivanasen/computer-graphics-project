@@ -54,25 +54,33 @@ function createScene() {
     scene.add(car);
 }
 
+function addClothes() {
+    // const tShirtG = new THREE.CylinderGeometry(5, 5, 20, 20);
+    // const tShirtM = new THREE.MeshPhongMaterial({ color: 'blue' });
+    // const tShirt = new THREE.Mesh(tShirtG, tShirtM);
+    // tShirt.position.y += 5;
+    // player.тяло.add(tShirt);
+}
+
 function addLights() {
-    const light = new THREE.DirectionalLight('lightblue', 0.5);
-    light.position.set(0, 100, 100);
-    light.castShadow = true;
-    scene.add(light);
-    scene.add(new THREE.AmbientLight('white'));
+    // const light = new THREE.DirectionalLight('lightblue', 0.3);
+    // light.position.set(0, 100, 100);
+    // light.castShadow = true;
+    // scene.add(light);
+    scene.add(new THREE.AmbientLight(0xf8f8f8));
 
-    // const pointLight = new THREE.PointLight(0xffffff);
-    // pointLight.castShadow = true;
-    // pointLight.position.set(0, 200, 200);
+    const pointLight = new THREE.PointLight(0xc8c8a8);
+    pointLight.castShadow = true;
+    pointLight.decay = 2;
+    pointLight.position.set(0, 100, 100);
 
-    // pointLight.shadow.mapSize.width = 1024;
-    // pointLight.shadow.mapSize.height = 1024;
+    pointLight.shadow.mapSize.width = 1024;
+    pointLight.shadow.mapSize.height = 1024;
 
-    // pointLight.shadow.camera.near = 0.5;
-    // pointLight.shadow.camera.far = 500;
-    // pointLight.shadow.camera.fov = 30;
+    pointLight.shadow.camera.near = 100;
+    pointLight.shadow.camera.far = 500;
 
-    // scene.add(pointLight);
+    scene.add(pointLight);
 }
 
 function initialisePlayer() {
@@ -91,11 +99,14 @@ function initialisePlayer() {
     player.д_глезен.врът(0, 10, 0);
     player.л_глезен.врът(0, -10, 0);
 
+    const skinMaterial = new THREE.MeshPhongMaterial();
     const tShirtColor = 0x024c85;
     const skinColor = 0x59372e;
     const pantsColor = 0x192027;
     setColor(player.таз, pantsColor);
     setColor(player.тяло, tShirtColor);
+    setMaterial(player.л_лакът, skinMaterial);
+    setMaterial(player.д_лакът, skinMaterial);
     setColor(player.л_лакът, skinColor);
     setColor(player.д_лакът, skinColor);
     setColor(player.глава, skinColor);
@@ -112,16 +123,26 @@ function initialisePlayer() {
     hat = createPlayerHat();
     player.глава.add(hat);
 
-    console.log(player);
+    addClothes();
+
+    player.traverse(child => {
+        child.castShadow = true;
+    });
 }
 
 function createGolfStick() {
-    const geometry = new THREE.CylinderGeometry(0.3, 0.3, 41, 32);
+    const geometry = new THREE.CylinderGeometry(0.3, 0.3, 41, 20);
     const material = new THREE.MeshPhysicalMaterial();
     const cylinder = new THREE.Mesh(geometry, material);
-    cylinder.position.set(0, 4, 0)
+    cylinder.position.set(0, 4, 0);
     cylinder.rotation.set(0, 0, 0.3);
-    scene.add(cylinder);
+
+    const geometry1 = new THREE.CylinderGeometry(0.35, 0.35, 15, 20);
+    const material1 = new THREE.MeshPhysicalMaterial({ color: 0x121212 });
+    const cylinder1 = new THREE.Mesh(geometry1, material1);
+    cylinder1.position.set(3.9, -8.5, 0);
+    cylinder1.rotation.set(0, 0, 0.3);
+
 
     const endGeometry = new THREE.BoxGeometry(1, 2, 4);
     const end = new THREE.Mesh(endGeometry, material);
@@ -130,6 +151,7 @@ function createGolfStick() {
 
     const stick = new THREE.Group();
     stick.add(cylinder);
+    stick.add(cylinder1);
     stick.add(end);
 
     stick.position.y += 6;
@@ -375,6 +397,14 @@ function setColor(obj, color) {
     obj.traverse((child) => {
         if (child.type === 'Mesh') {
             child.material.color.set(color);
+        }
+    });
+}
+
+function setMaterial(obj, material) {
+    obj.traverse((child) => {
+        if (child.type === 'Mesh') {
+            child.material = material;
         }
     });
 }
